@@ -22,7 +22,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y fonts-noto-cjk libreoffice-writer
-          pip install python-docx==1.1.2 playwright==1.51.0 pymupdf==1.25.3 cairosvg==2.7.1
+          pip install python-docx==1.1.2 playwright==1.51.0 pymupdf==1.25.3 cairosvg==2.7.1 Pillow==11.1.0
           python -m playwright install --with-deps chromium
       - name: Audit public source
         run: python scripts/source_audit.py
@@ -42,7 +42,7 @@ jobs:
         run: |
           git config user.name "Handbook Build"
           git config user.email "handbook-build@users.noreply.github.com"
-          git add output web/downloads qa/report.json
+          git add output web/downloads qa/report.json qa/contact.png qa/page-*.png qa/source-metadata.json
           git diff --cached --quiet && exit 0
           git commit -m "build: export verified handbook PDF and DOCX [skip ci]"
           git pull --rebase origin main
