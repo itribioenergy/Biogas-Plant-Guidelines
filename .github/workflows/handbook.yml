@@ -47,3 +47,24 @@ jobs:
           git commit -m "build: export verified handbook PDF and DOCX [skip ci]"
           git pull --rebase origin main
           git push origin HEAD:main
+      - name: Package Pages preview
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: qa/site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Deploy preview
+        id: deployment
+        uses: actions/deploy-pages@v4

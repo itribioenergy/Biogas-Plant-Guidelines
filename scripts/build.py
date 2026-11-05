@@ -149,8 +149,8 @@ with sync_playwright() as pw:
     # Print must include every page even while filtered.
     page.emulate_media(media="print")
     assert page.evaluate("Array.from(document.querySelectorAll('.page')).every(p=>getComputedStyle(p).display==='flex')")
-    page.locator("#search").fill("")
     page.emulate_media(media="screen")
+    page.locator("#search").fill("")
     page.locator("#mode").click()
     page.locator("#jump").select_option("P05")
     page.wait_for_function("document.querySelector('#P05').classList.contains('selected')")
@@ -221,3 +221,11 @@ with zipfile.ZipFile(OUT/"handbook-v1-bundle.zip","w",zipfile.ZIP_DEFLATED) as z
     for name in ["README.md","docs/source-map.md","docs/review-checklist.md"]:
         if Path(name).exists():z.write(name,name)
 print(json.dumps(report,ensure_ascii=False,indent=2))
+
+# Static deployment package contains only the public preview and supporting files.
+site=QA/"site"
+site.mkdir(exist_ok=True)
+for name in ["web","content","assets","docs"]:
+    shutil.copytree(ROOT/name,site/name,dirs_exist_ok=True)
+for name in ["index.html","README.md"]:
+    shutil.copy2(ROOT/name,site/name)

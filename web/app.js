@@ -11,7 +11,7 @@ async function main(){const d=window.HANDBOOK||await fetch('../content/handbook.
 window.handbookData=d;
 document.querySelector('#book').innerHTML=cover(d)+d.pages.map(pageHTML).join('');
 const select=document.querySelector('#jump');select.innerHTML='<option value="cover">封面</option>'+d.pages.map(p=>'<option value="'+p.id+'">'+p.id+' '+esc(p.title)+'</option>').join('');
-function jump(id){const target=document.getElementById(id)||document.getElementById('cover');document.querySelectorAll('.page').forEach(p=>p.classList.toggle('selected',p===target));select.value=target.id;if(!document.body.classList.contains('single'))target.scrollIntoView({behavior:'smooth',block:'start'});}
+function jump(id){if(document.querySelector('#search').value){document.querySelector('#search').value='';document.querySelector('#search').dispatchEvent(new Event('input'));}const target=document.getElementById(id)||document.getElementById('cover');document.querySelectorAll('.page').forEach(p=>p.classList.toggle('selected',p===target));select.value=target.id;if(!document.body.classList.contains('single'))target.scrollIntoView({behavior:'smooth',block:'start'});}
 select.onchange=()=>{location.hash=select.value};
 window.addEventListener('hashchange',()=>jump(location.hash.slice(1)));
 document.querySelector('#mode').onclick=()=>{const single=document.body.classList.toggle('single');document.querySelector('#mode').textContent=single?'顯示全書':'逐頁閱讀';document.querySelector('#mode').setAttribute('aria-pressed',String(single));jump(select.value)};
