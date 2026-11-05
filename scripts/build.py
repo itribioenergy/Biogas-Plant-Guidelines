@@ -18,7 +18,7 @@ for p in data["pages"]:
     assert len(p["blocks"])==4 and p["warning"] and p["source"]
     if p["diagram"]: assert Path("assets/diagrams",p["diagram"]+".svg").is_file()
 stem="Biogas-Plant-Health-Check-v1"
-report={"version":data["version"],"date":data["date"],"content_sha256":hashlib.sha256(Path("content/handbook.json").read_bytes()).hexdigest(),"technical_review":"pending","mascot":"missing original attachment; not accepted","source_attachment_match":"not verified"}
+report={"source_commit":os.environ.get("GITHUB_SHA","local"),"version":data["version"],"date":data["date"],"content_sha256":hashlib.sha256(Path("content/handbook.json").read_bytes()).hexdigest(),"technical_review":"pending","mascot":"missing original attachment; not accepted","source_attachment_match":"not verified"}
 expected={"mascot-character-sheet-v0.1.png":"b546e162beb2bdffdc25b128cc900cf60e572cc41c5adf081b42dc4cb7570a63","mascot-pose-sheet-v0.1.png":"9c694a3d5678751225be82cd69e5446a1b99a758682106333c79ae5b87cce06f"}
 hashes={}
 for name,h in expected.items():
@@ -53,11 +53,11 @@ style=doc.styles["Normal"]
 style.font.name="Noto Sans CJK TC";style.font.size=Pt(11)
 style.element.rPr.rFonts.set(qn("w:eastAsia"),"Noto Sans CJK TC")
 style.paragraph_format.line_spacing=1.45
-style.paragraph_format.space_after=Pt(4)
+style.paragraph_format.space_after=Pt(2)
 for name,size in [("Title",32),("Heading 1",21),("Heading 2",13.5)]:
     s=doc.styles[name];s.font.name="Noto Sans CJK TC";s.font.size=Pt(size);s.font.color.rgb=RGBColor.from_string("2F6B45")
     s.element.get_or_add_rPr().rFonts.set(qn("w:eastAsia"),"Noto Sans CJK TC")
-    s.paragraph_format.space_before=Pt(7);s.paragraph_format.space_after=Pt(5)
+    s.paragraph_format.space_before=Pt(5);s.paragraph_format.space_after=Pt(5)
     s.paragraph_format.line_spacing=1.2
 footer=sec.footer.paragraphs[0];footer.text="沼氣場健康檢查手冊 · 會議討論版 · 尚待技術與工安審查"
 for r in footer.runs:r.font.size=Pt(9.5)
@@ -204,6 +204,7 @@ result=subprocess.run(["libreoffice","-env:UserInstallation=file:///tmp/handbook
 assert result.returncode==0,result.stderr
 word_pdf=fitz.open(QA/"docx-render"/(stem+".pdf"))
 report["docx_render_pages"]=len(word_pdf)
+print("DOCX_PAGE_MAP",json.dumps([{"physical":i+1,"head":p.get_text()[:120],"tail":p.get_text()[-140:]} for i,p in enumerate(word_pdf)],ensure_ascii=False))
 assert len(word_pdf)==21,("DOCX page overflow",len(word_pdf))
 for i,p in enumerate(data["pages"],1):
     t=normalized(word_pdf[i].get_text())
@@ -218,7 +219,7 @@ report["overall"]="documents built; mascot, attachment comparison and profession
 (QA/"report.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf8")
 with zipfile.ZipFile(OUT/"handbook-v1-bundle.zip","w",zipfile.ZIP_DEFLATED) as z:
     for name in [stem+".pdf",stem+".docx","standalone.html"]:z.write(OUT/name,name)
-    for name in ["README.md","docs/source-map.md","docs/review-checklist.md"]:
+    for name in ["README.md","docs/source-map.md","docs/review-checklist.md","qa/report.json"]:
         if Path(name).exists():z.write(name,name)
 print(json.dumps(report,ensure_ascii=False,indent=2))
 
