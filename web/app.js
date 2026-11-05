@@ -1,0 +1,24 @@
+'use strict';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const diagramSrc=id=>window.DIAGRAMS?.[id]||('../assets/diagrams/'+id+'.svg');
+const figure=(id,title)=>id?'<figure class="figure"><img src="'+diagramSrc(id)+'" alt="'+esc(title)+'"><figcaption>圖示｜功能與判讀示意，非施工圖；現場配置依設備設計。</figcaption></figure>':'';
+function tableHTML(t){return '<div class="table-wrap"><table><thead><tr>'+t.headers.map(v=>'<th scope="col">'+esc(v)+'</th>').join('')+'</tr></thead><tbody>'+t.rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v||'＿＿＿＿')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
+const links=s=>esc(s).replace(/P\d{2}/g,id=>'<a href="#'+id+'">'+id+'</a>');
+function cover(d){return '<article class="page cover" id="cover"><div class="eyebrow">BIOGAS PLANT · FIELD GUIDE</div><h1>沼氣場<br>健康檢查手冊</h1><p class="subtitle">'+esc(d.subtitle)+'</p>'+figure('plant','全場物料與沼氣流程')+'<p class="cover-note">給農民、牧場負責人與非環工背景業主的巡檢助手。<br>從看得見的現象開始，找到下一個安全步驟。</p><div class="chapters"><div>01 導讀與快篩<br><small>P01–P03</small></div><div>02 生物系統<br><small>P04–P08</small></div><div>03 沼氣處理與安全<br><small>P09–P12</small></div><div>04 發電與實用工具<br><small>P13–P20</small></div></div><div class="cover-bottom"><strong>'+esc(d.status)+'</strong><br>第一版 · '+esc(d.date)+' · 封面＋20 頁<br>技術數值、設備配置與安全程序尚待專業審查。<br><span>'+esc(d.mascotStatus)+'</span></div></article>'}
+function pageHTML(p){const chapterClass={'生物系統':'bio','沼氣處理與安全':'gas','發電機系統':'engine','實用工具':'tools'}[p.chapter]||'';
+return '<article class="page '+chapterClass+(p.table?' has-table':'')+(['P09','P10','P11','P12','P13','P14','P15','P20'].includes(p.id)?' risk':'')+'" id="'+p.id+'"><div class="page-top"><span>'+esc(p.chapter)+' · 沼氣場健康檢查</span><b>'+p.id+'</b></div><h2>'+esc(p.title)+'</h2><div class="key">'+esc(p.key)+'</div>'+figure(p.diagram,p.title)+(p.form?'<p class="formline">'+esc(p.form)+'</p>':'')+(p.table?tableHTML(p.table):'')+'<div class="blocks">'+p.blocks.map((b,i)=>'<section class="block"><h3>'+('0'+(i+1))+' '+esc(b.title)+'</h3><ul>'+b.items.map(v=>'<li>'+esc(v)+'</li>').join('')+'</ul></section>').join('')+'</div>'+(p.formula?'<p class="formula">'+esc(p.formula)+'</p>':'')+'<aside class="warning"><strong>！安全界線</strong>'+esc(p.warning)+'</aside><p class="tip">'+esc(p.tip)+'</p><footer class="page-footer"><div class="source">'+esc(p.source)+'</div><div class="related">相關頁<br>'+links(p.related)+'</div></footer></article>'}
+async function main(){const d=window.HANDBOOK||await fetch('../content/handbook.json').then(r=>{if(!r.ok)throw Error('無法讀取內容');return r.json()});
+window.handbookData=d;
+document.querySelector('#book').innerHTML=cover(d)+d.pages.map(pageHTML).join('');
+const select=document.querySelector('#jump');select.innerHTML='<option value="cover">封面</option>'+d.pages.map(p=>'<option value="'+p.id+'">'+p.id+' '+esc(p.title)+'</option>').join('');
+function jump(id){const target=document.getElementById(id)||document.getElementById('cover');document.querySelectorAll('.page').forEach(p=>p.classList.toggle('selected',p===target));select.value=target.id;if(!document.body.classList.contains('single'))target.scrollIntoView({behavior:'smooth',block:'start'});}
+select.onchange=()=>{location.hash=select.value};
+window.addEventListener('hashchange',()=>jump(location.hash.slice(1)));
+document.querySelector('#mode').onclick=()=>{const single=document.body.classList.toggle('single');document.querySelector('#mode').textContent=single?'顯示全書':'逐頁閱讀';document.querySelector('#mode').setAttribute('aria-pressed',String(single));jump(select.value)};
+document.querySelector('#prev').onclick=()=>{select.selectedIndex=Math.max(0,select.selectedIndex-1);location.hash=select.value};
+document.querySelector('#next').onclick=()=>{select.selectedIndex=Math.min(select.options.length-1,select.selectedIndex+1);location.hash=select.value};
+document.querySelector('#search').oninput=e=>{const q=e.target.value.trim().toLowerCase();document.body.classList.remove('single');document.querySelector('#mode').textContent='逐頁閱讀';document.querySelector('#mode').setAttribute('aria-pressed','false');let count=0;document.querySelectorAll('.page').forEach(p=>{const match=!q||p.textContent.toLowerCase().includes(q);p.hidden=!match;if(match)count++});document.querySelector('#results').textContent=q?'符合 '+count+' 頁':'封面＋20 頁';document.querySelector('#empty').style.display=count?'none':'block'};
+document.querySelector('#print').onclick=()=>window.print();
+jump(location.hash.slice(1)||'cover');document.querySelector('#loading').remove();window.handbookReady=true;
+}
+main().catch(e=>{document.querySelector('#loading').textContent='載入失敗：'+e.message+'。請用本地 HTTP 伺服器開啟，或下載 standalone.html。';});
