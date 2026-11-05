@@ -1,0 +1,37 @@
+{
+  "source_commit": "29b65135904d73622b57dc325b57bfae029ae17e",
+  "version": "1.0-discussion",
+  "date": "2026-11-06",
+  "content_sha256": "516e010aaac23ab18c106373e9356c104e3492c43d63e2116b5ce5ab0f73d4cb",
+  "technical_review": "pending",
+  "mascot": "missing original attachment; not accepted",
+  "source_attachment_match": "not verified",
+  "mascot_original_hashes": {},
+  "docx_native_editable": true,
+  "mobile_widths_passed": [
+    390,
+    768
+  ],
+  "print_overflow": [],
+  "browser_errors": [],
+  "standalone_load": true,
+  "pdf_pages": 21,
+  "pdf_page_titles_and_warnings": "21 pages, 20 titles and complete warnings verified",
+  "docx_render_pages": 21,
+  "docx_open_test": "python-docx reopen and LibreOffice 21-page render passed; Microsoft Word not directly tested",
+  "files": {
+    "Biogas-Plant-Health-Check-v1.docx": {
+      "bytes": 1210760,
+      "sha256": "9818437d821bcdf450b290cc27392b47d77f096025d3e1f07846246dd5cda8f4"
+    },
+    "Biogas-Plant-Health-Check-v1.pdf": {
+      "bytes": 1484005,
+      "sha256": "5558a5df203500b3146f1a64b371db058bd9ec3df57310675fb27c2d75f41cd5"
+    },
+    "standalone.html": {
+      "bytes": 79963,
+      "sha256": "4c15f1194c7f414469700d34ada352249c1b15fd42ada63d37803778df47e3f7"
+    }
+  },
+  "overall": "documents built; mascot, attachment comparison and professional review remain incomplete"
+}
